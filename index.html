@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Panel WhatsApp</title>
+  <style>
+    body { font-family: Arial, sans-serif; background:#0d1117; color:#fff; display:flex; flex-direction:column; align-items:center; padding:20px; }
+    h1 { color:#58a6ff; }
+    .box { background:#161b22; padding:20px; border-radius:10px; width:100%; max-width:400px; margin-bottom:20px; }
+    input, button { width:100%; padding:10px; margin-top:10px; border-radius:5px; border:none; }
+    input { background:#0d1117; color:#fff; border:1px solid #30363d; }
+    button { background:#238636; color:#fff; cursor:pointer; font-weight:bold; }
+    button:hover { background:#2ea043; }
+    pre { background:#0d1117; padding:10px; border-radius:5px; }
+  </style>
+</head>
+<body>
+  <h1>🚀 Create WhatsApp Panel</h1>
+
+  <!-- Connect form -->
+  <div class="box">
+    <h3>🔗 Connect Bot</h3>
+    <input type="text" id="userId" placeholder="Masukkan User ID" />
+    <input type="text" id="phone" placeholder="Nomor WhatsApp (62xxx)" />
+    <button onclick="connect()">Connect</button>
+    <pre id="pairing"></pre>
+  </div>
+
+  <!-- Send message form -->
+  <div class="box" id="sendBox" style="display:none;">
+    <h3>📩 Kirim Pesan</h3>
+    <input type="text" id="target" placeholder="Nomor target (62xxx)" />
+    <input type="text" id="msg" placeholder="Pesan" />
+    <button onclick="sendMessage()">Send</button>
+    <pre id="sendStatus"></pre>
+  </div>
+
+  <script>
+    async function connect() {
+      const userId = document.getElementById("userId").value;
+      const phone = document.getElementById("phone").value;
+      if (!userId || !phone) return alert("Isi userId dan nomor!");
+
+      const res = await fetch("/api/ptero?type=connect", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, phone })
+      });
+      const data = await res.json();
+      document.getElementById("pairing").textContent = JSON.stringify(data, null, 2);
+
+      if (data.pairingCode || data.message === "Already connected") {
+        document.getElementById("sendBox").style.display = "block";
+      }
+    }
+
+    async function sendMessage() {
+      const userId = document.getElementById("userId").value;
+      const number = document.getElementById("target").value;
+      const message = document.getElementById("msg").value;
+      if (!userId || !number || !message) return alert("Isi semua data!");
+
+      const res = await fetch("/api/ptero?type=send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, number, message })
+      });
+      const data = await res.json();
+      document.getElementById("sendStatus").textContent = JSON.stringify(data, null, 2);
+    }
+  </script>
+</body>
+</html>
